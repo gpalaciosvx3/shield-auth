@@ -1,6 +1,6 @@
-# {{project-name}}
+# shield-auth
 
-{{project-description}}
+Servicio centralizado de autenticación y autorización. Expone una API HTTP para login, refresh y logout de usuarios, y un Lambda Authorizer que valida tokens JWT en el API Gateway antes de que lleguen a otros servicios.
 
 ---
 
@@ -26,29 +26,79 @@
 
 | Recurso | Nombre | Descripción |
 |---|---|---|
-| API Gateway REST | `UE1{{PROJECT}}GTW001` | Entry point HTTP con API Key + Usage Plan |
-| Lambda `ping` | `UE1{{PROJECT}}LMB001` | Health check |
-| IAM Role | `UE1{{PROJECT}}ROL001` | Rol de ejecución compartido |
+| API Gateway HTTP | `UE1SHIELDAUTHGTW001` | Entry point HTTP |
+| Lambda `auth-service` | `UE1SHIELDAUTHLMB001` | Login / Refresh / Logout |
+| Lambda `authorizer` | `UE1SHIELDAUTHLMB002` | Validación JWT + blacklist |
+| DynamoDB `users` | `UE1SHIELDAUTHDDB001` | Tabla de usuarios |
+| DynamoDB `refresh-tokens` | `UE1SHIELDAUTHDDB002` | Refresh tokens activos |
+| ElastiCache Redis | — | Rate limiting + blacklist de tokens |
+| IAM Role | `UE1SHIELDAUTHROL001` | Rol de ejecución compartido |
 
 ---
 
 ## API Reference
 
-Todas las rutas requieren el header `x-api-key`.
-
 ### Endpoints
 
-#### GET `/v1/ping`
+#### POST `/auth/login`
 
-Health check del servicio.
+Autentica un usuario y devuelve un par de tokens.
+
+**Body:**
+```json
+{ "email": "user@example.com", "password": "secret" }
+```
 
 **Response `200`:**
 ```json
 {
   "data": {
-    "message": "pong",
-    "timestamp": "2026-04-08T12:00:00.000Z"
+    "accessToken": "<jwt>",
+    "refreshToken": "<uuid>",
+    "expiresIn": 900
   }
+}
+```
+
+---
+
+#### POST `/auth/refresh`
+
+Rota el refresh token y devuelve un nuevo par.
+
+**Body:**
+```json
+{ "refreshToken": "<uuid>" }
+```
+
+**Response `200`:**
+```json
+{
+  "data": {
+    "accessToken": "<jwt>",
+    "refreshToken": "<uuid>",
+    "expiresIn": 900
+  }
+}
+```
+
+---
+
+#### POST `/auth/logout`
+
+Revoca el refresh token y añade el access token a la blacklist.
+
+**Headers:** `Authorization: Bearer <accessToken>`
+
+**Body:**
+```json
+{ "refreshToken": "<uuid>" }
+```
+
+**Response `200`:**
+```json
+{
+  "data": { "message": "Sesión cerrada correctamente" }
 }
 ```
 
@@ -56,16 +106,16 @@ Health check del servicio.
 
 ### Códigos de error
 
-```json
-{ "code": "APP-001", "description": "Ocurrió un error inesperado" }
-```
-
 | Código | HTTP | Descripción |
 |---|---|---|
 | `APP-001` | 500 | Error inesperado |
 | `APP-002` | 500 | Variable de entorno faltante |
 | `APP-003` | 400 | Body de request inválido |
-
+| `AUTH-001` | 401 | Credenciales inválidas |
+| `AUTH-002` | 429 | Demasiados intentos fallidos |
+| `AUTH-003` | 401 | Token inválido o expirado |
+| `AUTH-004` | 401 | Refresh token ya fue rotado |
+| `AUTH-005` | 401 | Usuario asociado al token no existe |
 
 ---
 
@@ -86,7 +136,7 @@ npm test
 > Copiar `.env.example` a `.env` y completar `LOCALSTACK_AUTH_TOKEN`.
 
 ```bash
-# Levantar LocalStack
+# Levantar LocalStack + Redis
 docker compose up -d
 
 # Instalar CLI (una sola vez)
@@ -117,7 +167,7 @@ CDK_STAGE=dev cdk deploy --require-approval never
 CDK_STAGE=dev cdk destroy
 ```
 
-> URL del endpoint: `https://{id}.execute-api.us-east-1.amazonaws.com/{stage}/v1/{path}`
+> URL del endpoint: `https://{id}.execute-api.us-east-1.amazonaws.com/{stage}/v11/{path}`
 
 ---
 

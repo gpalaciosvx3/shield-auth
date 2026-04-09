@@ -1,0 +1,41 @@
+import { Module } from '@nestjs/common';
+import { EnvValidationMiddleware } from '../../../common/middleware/env-validation.middleware';
+import { EnvConstants } from '../../../common/constants/env.constants';
+import { envConfig } from '../../../common/config/env.config';
+import { BlacklistCacheRepository } from '../../domain/repository/blacklist.cache.repository';
+import { BlacklistCacheRepositoryImpl } from '../repository/blacklist.cache.repository.impl';
+import { JwtVerifierService } from '../../domain/service/jwt-verifier.service';
+import { AuthorizerService } from '../../domain/service/authorizer.service';
+import { AuthorizeUseCase } from '../../application/use-cases/authorize.usecase';
+import { AuthorizerController } from '../controller/authorizer.controller';
+
+@Module({
+  controllers: [AuthorizerController],
+  providers: [
+    EnvValidationMiddleware.register(EnvConstants.REQUERIDAS_AUTHORIZER),
+    {
+      provide: BlacklistCacheRepository,
+      useFactory: () => new BlacklistCacheRepositoryImpl(),
+    },
+    {
+      provide: JwtVerifierService,
+      useFactory: () => new JwtVerifierService({
+        secret: envConfig.jwtSecret,
+        expiresIn: envConfig.jwtExpiresIn,
+      }),
+    },
+    {
+      provide: AuthorizerService,
+      useFactory: (jwtVerifier: JwtVerifierService, blacklistRepo: BlacklistCacheRepository) =>
+        new AuthorizerService(jwtVerifier, blacklistRepo),
+      inject: [JwtVerifierService, BlacklistCacheRepository],
+    },
+    {
+      provide: AuthorizeUseCase,
+      useFactory: (authorizerService: AuthorizerService) => new AuthorizeUseCase(authorizerService),
+      inject: [AuthorizerService],
+    },
+    AuthorizerController,
+  ],
+})
+export class AuthorizerModule {}

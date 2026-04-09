@@ -5,8 +5,8 @@ import { RedisConstants } from '../../../common/constants/redis.constants';
 
 @Injectable()
 export class BlacklistCacheRepositoryImpl extends BlacklistCacheRepository {
-  async add(jti: string, ttlSeconds: number): Promise<void> {
+  async exists(jti: string): Promise<boolean> {
     const key = RedisConstants.blacklistKey(jti);
-    await withRedisBreaker(() => redisClient.set(key, '1', 'EX', ttlSeconds));
+    return Boolean(await withRedisBreaker(() => redisClient.exists(key)));
   }
 }
