@@ -24,4 +24,34 @@ export class ErrorDictionary {
     descripcion: 'El cuerpo de la solicitud no es válido',
     statusCode: HttpStatus.BAD_REQUEST,
   };
+
+  static readonly INVALID_CREDENTIALS: InputError = {
+    code: 'AUTH-001',
+    descripcion: 'Credenciales inválidas',
+    statusCode: HttpStatus.UNAUTHORIZED,
+  };
+
+  static readonly RATE_LIMIT_EXCEEDED: InputError = {
+    code: 'AUTH-002',
+    descripcion: 'Demasiados intentos fallidos, intente de nuevo más tarde',
+    statusCode: HttpStatus.TOO_MANY_REQUESTS,
+  };
+
+  static readonly REFRESH_TOKEN_INVALID: InputError = {
+    code: 'AUTH-003',
+    descripcion: 'Refresh token inválido o expirado',
+    statusCode: HttpStatus.UNAUTHORIZED,
+  };
+
+  static readonly REFRESH_TOKEN_REUSED: InputError = {
+    code: 'AUTH-004',
+    descripcion: 'Refresh token ya fue rotado',
+    statusCode: HttpStatus.UNAUTHORIZED,
+  };
+
+  static readonly USER_NOT_FOUND: InputError = {
+    code: 'AUTH-005',
+    descripcion: 'El usuario asociado al token no existe',
+    statusCode: HttpStatus.UNAUTHORIZED,
+  };
 }

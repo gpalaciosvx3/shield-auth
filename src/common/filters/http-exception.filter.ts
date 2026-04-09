@@ -1,8 +1,9 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from '@nestjs/common';
 import { FastifyReply } from 'fastify';
+import { JsonWebTokenError } from 'jsonwebtoken';
 import { CustomException } from '../errors/custom.exception';
-import { ApiErrorBody } from '../types/api-response.types';
 import { ErrorDictionary } from '../errors/error.dictionary';
+import { ApiErrorBody } from '../types/api-response.types';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -12,6 +13,15 @@ export class HttpExceptionFilter implements ExceptionFilter {
     if (exception instanceof CustomException) {
       const body: ApiErrorBody = exception.toResponseBody();
       response.status(exception.statusCode).send(body);
+      return;
+    }
+
+    if (exception instanceof JsonWebTokenError) {
+      const body: ApiErrorBody = {
+        code: ErrorDictionary.REFRESH_TOKEN_INVALID.code,
+        description: ErrorDictionary.REFRESH_TOKEN_INVALID.descripcion,
+      };
+      response.status(ErrorDictionary.REFRESH_TOKEN_INVALID.statusCode).send(body);
       return;
     }
 
