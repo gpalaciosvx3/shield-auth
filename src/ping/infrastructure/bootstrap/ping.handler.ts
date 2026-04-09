@@ -1,14 +1,25 @@
-import { APIGatewayProxyResult } from 'aws-lambda';
-import { createLambdaHandler } from '../../../common/bootstrap/lambda.factory';
-import { LambdaEventMiddleware } from '../../../common/middleware/lambda-event.middleware';
+import { APIGatewayProxyEvent, Context } from 'aws-lambda';
+import awsLambdaFastify, { LambdaResponse } from '@fastify/aws-lambda';
+import { FastifyInstance } from 'fastify';
+import { createFastifyApp } from '../../../common/bootstrap/fastify.factory';
 import { PingModule } from './ping.module';
-import { PingController } from '../controller/ping.controller';
 
-export const handler = createLambdaHandler<PingController, unknown, APIGatewayProxyResult>(
-  PingModule,
-  PingController,
-  (ctrl, _event) => {
-    LambdaEventMiddleware.extract(_event);
-    return ctrl.handle();
-  },
-);
+type AwsProxyHandler = (event: APIGatewayProxyEvent, context: Context) => Promise<LambdaResponse>;
+
+let proxy: AwsProxyHandler | undefined;
+
+const bootstrap = async (): Promise<AwsProxyHandler> => {
+  const app = await createFastifyApp(PingModule);
+  const instance = app.getHttpAdapter().getInstance() as unknown as FastifyInstance;
+  return awsLambdaFastify<APIGatewayProxyEvent>(instance);
+};
+
+export const handler = async (
+  event: APIGatewayProxyEvent,
+  context: Context,
+): Promise<LambdaResponse> => {
+  if (!proxy) {
+    proxy = await bootstrap();
+  }
+  return proxy(event, context);
+};

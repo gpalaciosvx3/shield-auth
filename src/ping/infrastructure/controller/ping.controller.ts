@@ -1,20 +1,18 @@
-import { Injectable, HttpStatus, Logger } from '@nestjs/common';
-import { APIGatewayProxyResult } from 'aws-lambda';
+import { Controller, Get, HttpCode, HttpStatus } from '@nestjs/common';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { PingUseCase } from '../../application/use-cases/ping.usecase';
-import { ApiGwHelper } from '../../../common/helpers/api-gw.helper';
+import { PingResponseDto } from '../../application/dtos/ping.response.dto';
 
-@Injectable()
+@ApiTags('health')
+@Controller('ping')
 export class PingController {
-  private readonly logger = new Logger(PingController.name);
-
   constructor(private readonly useCase: PingUseCase) {}
 
-  async handle(): Promise<APIGatewayProxyResult> {
-    try {
-      return ApiGwHelper.success(HttpStatus.OK, await this.useCase.execute());
-    } catch (error) {
-      this.logger.error('Error en ping', error);
-      return ApiGwHelper.error(error);
-    }
+  @Get()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Health check' })
+  @ApiOkResponse({ type: PingResponseDto })
+  handle(): Promise<PingResponseDto> {
+    return this.useCase.execute();
   }
 }

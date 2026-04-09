@@ -8,6 +8,7 @@ import { PingUseCase } from '../../application/use-cases/ping.usecase';
 import { PingController } from '../controller/ping.controller';
 
 @Module({
+  controllers: [PingController],
   providers: [
     EnvValidationMiddleware.register(EnvConstants.REQUERIDAS_PING),
     {
@@ -23,11 +24,6 @@ import { PingController } from '../controller/ping.controller';
       provide: PingUseCase,
       useFactory: (svc: PingService) => new PingUseCase(svc),
       inject: [PingService],
-    },
-    {
-      provide: PingController,
-      useFactory: (uc: PingUseCase) => new PingController(uc),
-      inject: [PingUseCase],
     },
   ],
 })
