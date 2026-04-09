@@ -6,7 +6,8 @@
     "build": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
-    "local:auth": "ts-node local-test/auth.runner.ts"
+    "local:auth": "ts-node local-test/auth.runner.ts",
+    "local:authorizer": "ts-node local-test/authorizer.runner.ts"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.600.0",
