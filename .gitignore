@@ -143,3 +143,6 @@ vite.config.ts.timestamp-*
 
 # CDK Out
 cdk.out/
+
+# Project specifications
+project-spec.md
