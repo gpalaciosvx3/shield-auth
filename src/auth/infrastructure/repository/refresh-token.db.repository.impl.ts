@@ -3,6 +3,8 @@ import { RefreshTokenDbRepository } from '../../domain/repository/refresh-token.
 import { RefreshTokenEntity } from '../../domain/entities/refresh-token.entity';
 import { DynamoClient } from '../../../common/dynamo/dynamo.client';
 import { envConfig } from '../../../common/config/env.config';
+import { AuthMapper } from './common/auth.mapper';
+import { RefreshTokenRaw } from './common/auth.types';
 
 @Injectable()
 export class RefreshTokenDbRepositoryImpl extends RefreshTokenDbRepository {
@@ -15,7 +17,8 @@ export class RefreshTokenDbRepositoryImpl extends RefreshTokenDbRepository {
   }
 
   async findById(tokenId: string): Promise<RefreshTokenEntity | null> {
-    return await this.dynamo.get<RefreshTokenEntity>(envConfig.refreshTokensTable, { tokenId });
+    const raw = await this.dynamo.get<RefreshTokenRaw>(envConfig.refreshTokensTable, { tokenId });
+    return raw ? AuthMapper.toRefreshTokenEntity(raw) : null;
   }
 
   async revoke(tokenId: string): Promise<void> {

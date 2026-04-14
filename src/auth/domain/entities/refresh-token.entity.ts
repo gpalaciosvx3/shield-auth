@@ -37,4 +37,8 @@ export class RefreshTokenEntity {
   isExpired(): boolean {
     return this.expiresAt < Math.floor(Date.now() / 1000);
   }
+
+  static fromPersistence(raw: { tokenId: string; userId: string; deviceId: string; expiresAt: number; isRevoked: boolean }): RefreshTokenEntity {
+    return new RefreshTokenEntity(raw.tokenId, raw.userId, raw.deviceId, raw.expiresAt, raw.isRevoked);
+  }
 }

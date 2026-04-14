@@ -8,6 +8,10 @@ export class UserEntity {
     readonly createdAt: string,
   ) {}
 
+  static fromPersistence(raw: { userId: string; email: string; passwordHash: string; createdAt: string }): UserEntity {
+    return new UserEntity(raw.userId, raw.email, raw.passwordHash, raw.createdAt);
+  }
+
   verifyPassword(plain: string): boolean {
     return compareSync(plain, this.passwordHash);
   }
