@@ -4,48 +4,50 @@ import { Construct } from 'constructs';
 import { ResourceConstants } from '../../../common/constants/resource.constants';
 
 interface HttpApiProps {
-  pingFn: lambda.IFunction;
+  authFn: lambda.IFunction;
+  authorizerFn: lambda.IFunction;
   stage: string;
 }
 
 export class HttpApiConstruct extends Construct {
   readonly url: string;
+  readonly authorizerArn: string;
 
   constructor(scope: Construct, id: string, props: HttpApiProps) {
     super(scope, id);
 
     const api = new apigateway.RestApi(this, 'Api', {
       restApiName: ResourceConstants.API_NAME,
-      description: 'API REST del proyecto',
+      description: 'API REST del proyecto Shield Auth',
       deployOptions: {
         stageName: props.stage,
       },
       defaultCorsPreflightOptions: {
         allowOrigins: apigateway.Cors.ALL_ORIGINS,
-        allowMethods: ['GET', 'OPTIONS'],
+        allowMethods: ['GET', 'POST', 'OPTIONS'],
         allowHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
       },
     });
 
-    const apiKey = new apigateway.ApiKey(this, 'ApiKey', {
-      apiKeyName: `${ResourceConstants.API_NAME}-KEY`,
-      description: 'API Key para acceso al API',
-    });
-
-    const usagePlan = new apigateway.UsagePlan(this, 'UsagePlan', {
-      name: `${ResourceConstants.API_NAME}-PLAN`,
-      apiStages: [{ api, stage: api.deploymentStage }],
-      throttle: { rateLimit: 100, burstLimit: 200 },
-    });
-
-    usagePlan.addApiKey(apiKey);
-
-    const pingIntegration = new apigateway.LambdaIntegration(props.pingFn);
-
     const v1   = api.root.addResource('v1');
-    const ping = v1.addResource('ping');
-    ping.addMethod('GET', pingIntegration, { apiKeyRequired: true });
+    const auth  = v1.addResource('auth');
+    const login   = auth.addResource('login');
+    const refresh = auth.addResource('refresh');
+    const logout  = auth.addResource('logout');
+
+    const authIntegration = new apigateway.LambdaIntegration(props.authFn);
+
+    login.addMethod('POST', authIntegration, {
+      authorizationType: apigateway.AuthorizationType.NONE,
+    });
+    refresh.addMethod('POST', authIntegration, {
+      authorizationType: apigateway.AuthorizationType.NONE,
+    });
+    logout.addMethod('POST', authIntegration, {
+      authorizationType: apigateway.AuthorizationType.NONE,
+    });
 
     this.url = api.url;
+    this.authorizerArn = props.authorizerFn.functionArn;
   }
 }

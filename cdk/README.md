@@ -1,6 +1,6 @@
-# {{project-name}} — CDK
+# Shield Auth — CDK
 
-Infraestructura AWS del proyecto `{{project-name}}`, definida con AWS CDK (TypeScript).
+Infraestructura AWS del proyecto `Shield Auth`, definida con AWS CDK (TypeScript).
 
 ---
 
@@ -14,6 +14,7 @@ Infraestructura AWS del proyecto `{{project-name}}`, definida con AWS CDK (TypeS
 - [Comandos de referencia](#comandos-de-referencia)
 - [Stages y configuración](#stages-y-configuración)
 - [Recursos desplegados](#recursos-desplegados)
+- [Outputs del stack](#outputs-del-stack)
 
 ---
 
@@ -26,10 +27,16 @@ cdk/
   lib/
     app.stack.ts        # Stack principal
     constructs/
-      api-gateway/      # REST API v1, API Key, Usage Plan
+      api-gateway/      # REST API v1 con rutas auth
       cloudwatch/       # Log groups por Lambda
+      dynamodb/         # Tablas Users y RefreshTokens
+      elasticache/      # Cluster Redis (blacklist + rate-limit)
       iam/              # Rol de ejecución compartido
-      lambda/           # Una construct por función Lambda
+      lambda/
+        auth/           # Lambda auth-service (login / refresh / logout)
+        authorizer/     # Lambda Authorizer (validación JWT + blacklist)
+        shared/         # bundling.config.ts compartido
+      vpc/              # VPC con subnets privadas + VPC Endpoints
   common/
     constants/          # NamingConstants, ResourceConstants, InfraConstants
     stages/             # local.stage.ts, dev.stage.ts
@@ -125,6 +132,12 @@ awslocal apigateway get-stages --rest-api-id <api-id>
 
 # Lambda
 awslocal lambda list-functions --query 'Functions[*].FunctionName'
+
+# DynamoDB
+awslocal dynamodb list-tables
+
+# ElastiCache
+awslocal elasticache describe-cache-clusters
 ```
 
 ---
@@ -150,8 +163,32 @@ Para agregar un nuevo stage: crear `cdk/common/stages/qa.stage.ts` y extender el
 
 ## Recursos desplegados
 
-| Recurso | Nombre lógico | Nombre físico |
+| Recurso | Construct | Nombre físico |
 |---|---|---|
-| Lambda Ping | `PingFn` | `UE1{{PROJECT}}LMB001` |
-| API Gateway REST | `HttpApi` | `UE1{{PROJECT}}GTW001` |
-| IAM Role | `WorkerRole` | `UE1{{PROJECT}}ROL001` |
+| Lambda auth-service | `AuthFnConstruct` | `UE1SHIELDAUTHLMB001` |
+| Lambda Authorizer | `AuthorizerFnConstruct` | `UE1SHIELDAUTHLMB002` |
+| API Gateway REST | `HttpApiConstruct` | `UE1SHIELDAUTHGTW001` |
+| IAM Role | `WorkerRoleConstruct` | `UE1SHIELDAUTHROL001` |
+| VPC | `ShieldVpcConstruct` | `UE1SHIELDAUTHVPC001` |
+| Security Group Redis | `RedisClusterConstruct` | `UE1SHIELDAUTHSGP001` |
+| Security Group Lambda | `ShieldVpcConstruct` | `UE1SHIELDAUTHSGP002` |
+| ElastiCache Redis | `RedisClusterConstruct` | `UE1SHIELDAUTHECC001` |
+| DynamoDB Users | `AuthTablesConstruct` | `UE1SHIELDAUTHDDB001` |
+| DynamoDB RefreshTokens | `AuthTablesConstruct` | `UE1SHIELDAUTHDDB002` |
+
+### Rutas expuestas
+
+| Método | Ruta | Autorización |
+|---|---|---|
+| `POST` | `/v1/auth/login` | Ninguna |
+| `POST` | `/v1/auth/refresh` | Ninguna |
+| `POST` | `/v1/auth/logout` | Ninguna |
+
+---
+
+## Outputs del stack
+
+| Output | Descripción |
+|---|---|
+| `ApiUrl` | URL base del API Gateway |
+| `AuthorizerFunctionArn` | ARN del Lambda Authorizer — exportado como `shield-auth-authorizer-arn-{stage}` para uso en otros API Gateways |

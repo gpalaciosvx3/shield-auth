@@ -1,5 +1,5 @@
 {
-  "name": "{{project-name}}-cdk",
+  "name": "shield-auth-cdk",
   "version": "0.1.0",
   "private": true,
   "scripts": {

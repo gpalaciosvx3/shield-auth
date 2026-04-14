@@ -10,6 +10,7 @@ export const lambdaBundling: BundlingOptions = {
     '@nestjs/microservices/microservices-module',
     '@nestjs/websockets/socket-module',
     '@nestjs/platform-express',
+    '@fastify/view',
   ],
   minify: false,
   sourceMap: false,
