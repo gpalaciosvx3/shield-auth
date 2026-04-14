@@ -19,8 +19,7 @@ Servicio centralizado de autenticación y autorización. Expone una API HTTP par
 
 ## Arquitectura
 
-> Agrega tu diagrama: `docs/architecture.png`
-<!-- ![Arquitectura](./docs/architecture.png) -->
+![Arquitectura](./docs/architecture.png)
 
 ### Recursos AWS
 
