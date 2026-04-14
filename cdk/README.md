@@ -133,8 +133,24 @@ awslocal apigateway get-stages --rest-api-id <api-id>
 # Lambda
 awslocal lambda list-functions --query 'Functions[*].FunctionName'
 
-# DynamoDB
+# Lambda — listar variables de entorno (auth-service)
+awslocal lambda get-function-configuration \
+  --function-name UE1SHIELDAUTHLMB001 \
+  --query 'Environment.Variables'
+
+# Lambda — listar variables de entorno (authorizer)
+awslocal lambda get-function-configuration \
+  --function-name UE1SHIELDAUTHLMB002 \
+  --query 'Environment.Variables'
+
+# DynamoDB — listar tablas
 awslocal dynamodb list-tables
+
+# DynamoDB — listar usuarios
+awslocal dynamodb scan --table-name UE1SHIELDAUTHDDB001
+
+# DynamoDB — listar refresh tokens
+awslocal dynamodb scan --table-name UE1SHIELDAUTHDDB002
 
 # ElastiCache
 awslocal elasticache describe-cache-clusters

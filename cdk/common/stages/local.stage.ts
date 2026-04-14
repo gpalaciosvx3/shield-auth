@@ -4,5 +4,5 @@ export const LocalStage: StageConfig = {
   stage: 'local',
   account: '000000000000',
   region: 'us-east-1',
-  jwtSecret: 'local-dev-secret-change-me',
+  jwtSecret: 'shield-auth-secret-local',
 };
