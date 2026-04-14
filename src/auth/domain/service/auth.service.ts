@@ -92,6 +92,7 @@ export class AuthService {
 
   private async assertNotRateLimited(ip: string): Promise<void> {
     const count = await this.rateLimitRepo.getCount(ip);
+    this.logger.log(`Intentos de login para ip ${ip}: ${count}`);
     if (count >= this.config.rateLimitMaxAttempts) {
       this.logger.warn(`Límite de intentos excedido => ip: ${ip} | intentos: ${count}`);
       throw new CustomException(ErrorDictionary.RATE_LIMIT_EXCEEDED);
