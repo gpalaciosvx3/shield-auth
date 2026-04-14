@@ -18,6 +18,12 @@ export class AuthTablesConstruct extends Construct {
       removalPolicy: cdk.RemovalPolicy.RETAIN,
     });
 
+    this.usersTable.addGlobalSecondaryIndex({
+      indexName: 'email-index',
+      partitionKey: { name: 'email', type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
+
     this.refreshTokensTable = new dynamodb.Table(this, 'RefreshTokensTable', {
       tableName: ResourceConstants.TABLE_REFRESH_TOKENS,
       partitionKey: { name: 'tokenId', type: dynamodb.AttributeType.STRING },
