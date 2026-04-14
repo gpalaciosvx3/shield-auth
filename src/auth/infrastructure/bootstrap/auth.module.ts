@@ -22,7 +22,7 @@ import { AuthController } from '../controller/auth.controller';
   controllers: [AuthController],
   providers: [
     EnvValidationMiddleware.register(EnvConstants.REQUERIDAS_AUTH),
-    DynamoClient,
+    { provide: DynamoClient, useFactory: () => new DynamoClient() },
     {
       provide: UserDbRepository,
       useFactory: (dynamo: DynamoClient) => new UserDbRepositoryImpl(dynamo),

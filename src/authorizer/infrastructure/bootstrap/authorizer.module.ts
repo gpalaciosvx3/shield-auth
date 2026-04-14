@@ -35,7 +35,6 @@ import { AuthorizerController } from '../controller/authorizer.controller';
       useFactory: (authorizerService: AuthorizerService) => new AuthorizeUseCase(authorizerService),
       inject: [AuthorizerService],
     },
-    AuthorizerController,
   ],
 })
 export class AuthorizerModule {}

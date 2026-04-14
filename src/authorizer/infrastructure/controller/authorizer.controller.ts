@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { APIGatewayRequestAuthorizerEvent, APIGatewayAuthorizerResult } from 'aws-lambda';
 import { AuthorizeUseCase } from '../../application/use-cases/authorize.usecase';
 import { PolicyBuilder } from '../helpers/policy.builder';
 
 @Injectable()
 export class AuthorizerController {
-  constructor(private readonly authorizeUseCase: AuthorizeUseCase) {}
+  constructor(@Inject(AuthorizeUseCase) private readonly authorizeUseCase: AuthorizeUseCase) {}
 
   async handle(event: APIGatewayRequestAuthorizerEvent): Promise<APIGatewayAuthorizerResult> {
     try {

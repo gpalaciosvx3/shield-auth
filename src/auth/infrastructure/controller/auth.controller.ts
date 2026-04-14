@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Inject, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { FastifyRequest } from 'fastify';
 import { LoginAuthUseCase } from '../../application/use-cases/login-auth.usecase';
@@ -17,9 +17,9 @@ import { HttpConstants } from '../../../common/constants/http.constants';
 @Controller('auth')
 export class AuthController {
   constructor(
-    private readonly loginUseCase: LoginAuthUseCase,
-    private readonly refreshUseCase: RefreshAuthUseCase,
-    private readonly logoutUseCase: LogoutAuthUseCase,
+    @Inject(LoginAuthUseCase) private readonly loginUseCase: LoginAuthUseCase,
+    @Inject(RefreshAuthUseCase) private readonly refreshUseCase: RefreshAuthUseCase,
+    @Inject(LogoutAuthUseCase) private readonly logoutUseCase: LogoutAuthUseCase,
   ) {}
 
   @Post('login')
