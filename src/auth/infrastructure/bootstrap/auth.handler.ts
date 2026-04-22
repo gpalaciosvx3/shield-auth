@@ -9,7 +9,7 @@ type AwsProxyHandler = (event: APIGatewayProxyEvent, context: Context) => Promis
 let proxy: AwsProxyHandler | undefined;
 
 const bootstrap = async (): Promise<AwsProxyHandler> => {
-  const app = await createFastifyApp(AuthModule, false);
+  const app = await createFastifyApp(AuthModule);
   const instance = app.getHttpAdapter().getInstance() as unknown as FastifyInstance;
   return awsLambdaFastify<APIGatewayProxyEvent>(instance);
 };

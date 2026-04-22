@@ -12,6 +12,7 @@ import { LogoutRequestDto } from '../../application/dtos/request/logout.request.
 import { LogoutResponseDto } from '../../application/dtos/response/logout.response.dto';
 import { BearerTokenGuard } from '../../../common/guards/bearer-token.guard';
 import { HttpConstants } from '../../../common/constants/http.constants';
+import { HandleExecution } from '../../../common/decorator/handle-execution.decorator';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -26,6 +27,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Autenticar usuario y obtener tokens' })
   @ApiOkResponse({ type: LoginResponseDto })
+  @HandleExecution('LOGIN')
   login(
     @Body() dto: LoginRequestDto,
     @Req() req: FastifyRequest,
@@ -37,6 +39,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Rotar refresh token y obtener nuevo access token' })
   @ApiOkResponse({ type: RefreshResponseDto })
+  @HandleExecution('REFRESH')
   refresh(@Body() dto: RefreshRequestDto): Promise<RefreshResponseDto> {
     return this.refreshUseCase.execute(dto.refreshToken);
   }
@@ -47,6 +50,7 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Cerrar sesión y revocar tokens' })
   @ApiOkResponse({ type: LogoutResponseDto })
+  @HandleExecution('LOGOUT')
   logout(
     @Body() dto: LogoutRequestDto,
     @Req() req: FastifyRequest & Record<string, unknown>,
