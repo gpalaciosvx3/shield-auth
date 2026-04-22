@@ -27,12 +27,12 @@ import { AuthController } from '../controller/auth.controller';
     { provide: RedisClient, useFactory: () => new RedisClient() },
     {
       provide: UserDbRepository,
-      useFactory: (dynamo: DynamoClient) => new UserDbRepositoryImpl(dynamo),
+      useFactory: (dynamo: DynamoClient) => new UserDbRepositoryImpl(dynamo, envConfig.usersTable),
       inject: [DynamoClient],
     },
     {
       provide: RefreshTokenDbRepository,
-      useFactory: (dynamo: DynamoClient) => new RefreshTokenDbRepositoryImpl(dynamo),
+      useFactory: (dynamo: DynamoClient) => new RefreshTokenDbRepositoryImpl(dynamo, envConfig.refreshTokensTable),
       inject: [DynamoClient],
     },
     {
