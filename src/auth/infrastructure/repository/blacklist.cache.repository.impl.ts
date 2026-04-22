@@ -1,12 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { BlacklistCacheRepository } from '../../domain/repository/blacklist.cache.repository';
-import { withRedisBreaker, redisClient } from '../../../common/config/redis.config';
+import { RedisClient } from '../../../common/redis/redis.client';
 import { RedisConstants } from '../../../common/constants/redis.constants';
 
 @Injectable()
 export class BlacklistCacheRepositoryImpl extends BlacklistCacheRepository {
+  constructor(private readonly redis: RedisClient) {
+    super();
+  }
+
   async add(jti: string, ttlSeconds: number): Promise<void> {
     const key = RedisConstants.blacklistKey(jti);
-    await withRedisBreaker(() => redisClient.set(key, '1', 'EX', ttlSeconds));
+    await this.redis.set(key, '1', ttlSeconds);
   }
 }

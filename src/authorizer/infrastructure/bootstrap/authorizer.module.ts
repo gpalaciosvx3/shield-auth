@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { EnvValidationMiddleware } from '../../../common/middleware/env-validation.middleware';
 import { EnvConstants } from '../../../common/constants/env.constants';
 import { envConfig } from '../../../common/config/env.config';
+import { RedisClient } from '../../../common/redis/redis.client';
 import { BlacklistCacheRepository } from '../../domain/repository/blacklist.cache.repository';
 import { BlacklistCacheRepositoryImpl } from '../repository/blacklist.cache.repository.impl';
 import { JwtVerifierService } from '../../domain/service/jwt-verifier.service';
@@ -13,9 +14,11 @@ import { AuthorizerController } from '../controller/authorizer.controller';
   controllers: [AuthorizerController],
   providers: [
     EnvValidationMiddleware.register(EnvConstants.REQUERIDAS_AUTHORIZER),
+    { provide: RedisClient, useFactory: () => new RedisClient() },
     {
       provide: BlacklistCacheRepository,
-      useFactory: () => new BlacklistCacheRepositoryImpl(),
+      useFactory: (redis: RedisClient) => new BlacklistCacheRepositoryImpl(redis),
+      inject: [RedisClient],
     },
     {
       provide: JwtVerifierService,

@@ -24,6 +24,24 @@ export class ErrorDictionary {
     descripcion: 'El cuerpo de la solicitud no es válido',
     statusCode: HttpStatus.BAD_REQUEST,
   };
+  
+  static readonly SSM_PARAMETER_NOT_FOUND: InputError = {
+    code: 'APP-004',
+    descripcion: 'Parámetro SSM no encontrado',
+    statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+  };
+
+  static readonly REDIS_UNAVAILABLE: InputError = {
+    code: 'APP-005',
+    descripcion: 'Servicio de caché no disponible',
+    statusCode: HttpStatus.SERVICE_UNAVAILABLE,
+  };
+
+  static readonly DYNAMO_UNAVAILABLE: InputError = {
+    code: 'APP-006',
+    descripcion: 'Servicio de base de datos DynamoDB no disponible',
+    statusCode: HttpStatus.SERVICE_UNAVAILABLE,
+  };
 
   static readonly INVALID_CREDENTIALS: InputError = {
     code: 'AUTH-001',

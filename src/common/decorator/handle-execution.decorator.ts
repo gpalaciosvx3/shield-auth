@@ -13,6 +13,7 @@ export function HandleExecution(
       try {
         return await original.apply(this, args);
       } catch (error) {
+        // console.log(`Error en ${featureName}`, error);
         logger.error(`Error en ${featureName}`, error);
         if (onError) return onError(error);
         throw error;
