@@ -6,7 +6,6 @@ import { ResourceConstants } from '../../../common/constants/resource.constants'
 interface HttpApiProps {
   authFn: lambda.IFunction;
   authorizerFn: lambda.IFunction;
-  stage: string;
 }
 
 export class HttpApiConstruct extends Construct {
@@ -20,7 +19,7 @@ export class HttpApiConstruct extends Construct {
       restApiName: ResourceConstants.API_NAME,
       description: 'API REST del proyecto Shield Auth',
       deployOptions: {
-        stageName: props.stage,
+        stageName: 'prod',
       },
       defaultCorsPreflightOptions: {
         allowOrigins: apigateway.Cors.ALL_ORIGINS,

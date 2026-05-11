@@ -1,6 +1,5 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { StageConfig } from '../common/types/stage-config.types';
 import { WorkerRoleConstruct } from './constructs/iam/worker-role.construct';
 import { HttpApiConstruct } from './constructs/api-gateway/http-api.construct';
 import { ShieldVpcConstruct } from './constructs/vpc/shield-vpc.construct';
@@ -11,7 +10,7 @@ import { AuthorizerFnConstruct } from './constructs/lambda/authorizer/authorizer
 import { JwtSecretConstruct } from './constructs/ssm/jwt-secret.construct';
 
 interface AppStackProps extends cdk.StackProps {
-  config: StageConfig;
+  jwtSecret: string;
 }
 
 export class AppStack extends cdk.Stack {
@@ -30,8 +29,7 @@ export class AppStack extends cdk.Stack {
     const tables = new AuthTablesConstruct(this, 'Tables');
 
     const { param: jwtSecretParam } = new JwtSecretConstruct(this, 'JwtSecret', {
-      stage: props.config.stage,
-      value: props.config.jwtSecret,
+      value: props.jwtSecret,
     });
 
     const authFn = new AuthFnConstruct(this, 'AuthFn', {
@@ -55,7 +53,6 @@ export class AppStack extends cdk.Stack {
     const api = new HttpApiConstruct(this, 'HttpApi', {
       authFn: authFn.fn,
       authorizerFn: authorizerFn.fn,
-      stage: props.config.stage,
     });
 
     new cdk.CfnOutput(this, 'ApiUrl', {
@@ -66,7 +63,7 @@ export class AppStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'AuthorizerFunctionArn', {
       value: api.authorizerArn,
       description: 'ARN del Lambda Authorizer — usar en otros API Gateways',
-      exportName: `shield-auth-authorizer-arn-${props.config.stage}`,
+      exportName: 'shield-auth-authorizer-arn',
     });
   }
 }

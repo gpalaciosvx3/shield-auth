@@ -145,7 +145,7 @@ pip install awscli-local
 # Bootstrap + deploy
 cd cdk
 cdklocal bootstrap
-CDK_STAGE=local cdklocal deploy --require-approval never
+cdklocal deploy --require-approval never
 ```
 
 ---
@@ -157,16 +157,16 @@ CDK_STAGE=local cdklocal deploy --require-approval never
 cdk bootstrap aws://<ACCOUNT_ID>/us-east-1
 
 # Preview de cambios
-CDK_STAGE=dev cdk diff
+cdk diff
 
 # Deploy
-CDK_STAGE=dev cdk deploy --require-approval never
+cdk deploy --require-approval never
 
 # Destruir el stack
-CDK_STAGE=dev cdk destroy
+cdk destroy
 ```
 
-> URL del endpoint: `https://{id}.execute-api.us-east-1.amazonaws.com/{stage}/v11/{path}`
+> URL del endpoint: `https://{id}.execute-api.us-east-1.amazonaws.com/prod/v1/{path}`
 
 ---
 
@@ -176,22 +176,19 @@ CDK_STAGE=dev cdk destroy
 
 | Archivo | Trigger | Acción |
 |---|---|---|
-| `local.yml` | `push` a `local` | Deploy en LocalStack |
-| `dev.yml` | `push` a `develop` | Deploy en AWS DEV |
-| `qa.yml` | `push` a `release` | Deploy en AWS QA |
-| `prd.yml` | `push` a `master` | Deploy en AWS PRD |
-| `destroy.yml` | Manual (`workflow_dispatch`) | Destruye el stack del stage seleccionado |
+| `deploy.yml` | `pull_request` / `push` a `master` | Build + Deploy en AWS |
 
 ### Secretos requeridos
 
 Configurar en GitHub → Settings → Environments:
 
-**`deployer-dev` / `deployer-qa` / `deployer-prd`:**
+**`deployer`:**
 ```
 AWS_ACCESS_KEY_ID
 AWS_SECRET_ACCESS_KEY
 CDK_DEFAULT_ACCOUNT
 AWS_DEFAULT_REGION
+JWT_SECRET
 ```
 
 **`deployer-local`:**

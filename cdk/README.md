@@ -12,7 +12,6 @@ Infraestructura AWS del proyecto `Shield Auth`, definida con AWS CDK (TypeScript
 - [Desarrollo en LocalStack](#desarrollo-en-localstack)
 - [Despliegue en AWS](#despliegue-en-aws)
 - [Comandos de referencia](#comandos-de-referencia)
-- [Stages y configuración](#stages-y-configuración)
 - [Recursos desplegados](#recursos-desplegados)
 - [Outputs del stack](#outputs-del-stack)
 
@@ -39,8 +38,6 @@ cdk/
       vpc/              # VPC con subnets privadas + VPC Endpoints
   common/
     constants/          # NamingConstants, ResourceConstants, InfraConstants
-    stages/             # local.stage.ts, dev.stage.ts
-    types/              # StageConfig
   docker-compose.yml    # LocalStack Pro para desarrollo local
 ```
 
@@ -79,10 +76,10 @@ docker compose up -d
 cdklocal bootstrap
 
 # Deploy
-CDK_STAGE=local cdklocal deploy --require-approval never
+cdklocal deploy --require-approval never
 
 # Preview de cambios
-CDK_STAGE=local cdklocal diff
+cdklocal diff
 
 # Destruir
 cdklocal destroy --force
@@ -103,20 +100,13 @@ npm run destroy:local    # destruir stack
 
 ```bash
 # Bootstrap (una vez por cuenta/región)
-CDK_STAGE=dev cdk bootstrap aws://<ACCOUNT_ID>/us-east-1
+cdk bootstrap aws://<ACCOUNT_ID>/us-east-1
 
 # Preview
-CDK_STAGE=dev cdk diff
+cdk diff
 
 # Deploy
-CDK_STAGE=dev cdk deploy --require-approval never
-```
-
-### Scripts disponibles
-
-```bash
-npm run deploy:dev       # deploy a AWS DEV
-npm run diff:dev         # diff en AWS DEV
+cdk deploy --require-approval never
 ```
 
 ---
@@ -155,24 +145,6 @@ awslocal dynamodb scan --table-name UE1SHIELDAUTHDDB002
 # ElastiCache
 awslocal elasticache describe-cache-clusters
 ```
-
----
-
-## Stages y configuración
-
-| Stage | Branch | Cuenta |
-|---|---|---|
-| `dev` | `develop` | `CDK_DEFAULT_ACCOUNT` |
-| `qa` | `release` | pendiente |
-| `prd` | `master` | pendiente |
-
-El stage se controla con la variable de entorno `CDK_STAGE`:
-
-```bash
-CDK_STAGE=dev cdk deploy ...
-```
-
-Para agregar un nuevo stage: crear `cdk/common/stages/qa.stage.ts` y extender el `switch` en `bin/app.ts`.
 
 ---
 
