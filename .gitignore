@@ -135,7 +135,7 @@ dist
 !.yarn/versions
 
 # Package-lock
-package-lock.json
+cdk/package-lock.json
 
 # Vite logs files
 vite.config.js.timestamp-*
