@@ -27,7 +27,7 @@
     "jsonwebtoken": "^9.0.2",
     "opossum": "^8.1.4",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.0",
+    "rxjs": "^7.8.1",
     "uuid": "^9.0.1",
     "zod": "^3.23.8"
   },
